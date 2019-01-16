@@ -8,21 +8,35 @@ var calculator = {
     numberA: "",
     operator: "",
     numberB: "",
+    isNumberADecimal: false,
+    isNumberBDecimal: false,
 
-    addToCalculation : function(value) {        
-        //if value is the numberA
+    addToCalculation : function(value) {
+        //positive numberA        
         if(!isNaN(value) && this.operator == ""){
             this.numberA += value;
         }
+
+        //negative numberA
+        else if(!isNaN(value) && this.numberA == "" && (this.operator == "" || this.numberB == "")){
+            this.numberA = -value;
+            this.operator = "";
+        }
+        
+        //operator
         else if(isNaN(value)){
             this.operator = value;
         }
-        else{
+        
+        //numberB 
+        else if(!isNaN(value) && this.numberA != ""){
             this.numberB  += value;
         }   
-    }, //adicionar calculo instantaneo ao clicar em um outro operador após já ter o numberB 
+    }, 
 
     deleteLastOne: function(){
+        if(this.input.value == '0') { return; }
+
         if(this.numberA != "" && this.operator == "" && this.numberB == ""){
             let calc = this.numberA + "";
             let last = calc.length;
@@ -80,36 +94,84 @@ var calculator = {
     getOperator: function(event){
 
         switch(event.target.value){
-            case "add": operator = " + "; break;
-            case "sub": operator = " - "; break;
-            case "mul": operator = " x "; break;
-            case "div": operator = " / "; break;
-            case "per": operator = " % "; break;
+            case "add": this.operator = " + "; break;
+            case "sub": this.operator = " - "; break;
+            case "mul": this.operator = " x "; break;
+            case "div": this.operator = " / "; break;
+            case "per": this.operator = " % "; break;
         }
         
-        this.input.value += operator;
+        if(this.numberA == "")
+        {
+            if(this.operator != ' - '){
+                return this.operator = "";
+            }
+            else{
+                console.log("tacertokrl");
+            }
+        }
 
-        return operator;
+        this.input.value = this.numberA + this.operator;
+
+        return this.operator;
     },
 
-    sum: function(numberA, numberB){
-        return numberA + numberB;
+    addPoint : function(){
+        if(this.numberA != "" && this.operator == ""){
+            if(this.numberA.includes('.')){ 
+                return; 
+            }
+            else{
+                this.isNumberADecimal = true;
+                this.input.value += '.';
+                this.numberA += '.';
+            }
+        }
+        else if(this.operator != "" && this.numberB != ""){
+            if(this.numberB.includes('.')){ 
+                return; 
+            }
+            else{
+                this.isNumberBDecimal = true;
+                this.input.value += '.';
+                this.numberB += '.';
+            }
+        }
     },
 
-    subtract: function(numberA, numberB){
-        return numberA - numberB;
+    convertToDecimal: function(number){
+        let point = number.indexOf('.');
+        let last = number.length;
+        
+        let leftPoint = number.slice(0, point);
+        let rightPoint = number.slice(point, last);
+
+        return (leftPoint * 1.0) + (rightPoint / 1);
     },
 
-    multiply: function(numberA, numberB){
-        return numberA * numberB;
+    thereIsNoDecimal : function(){
+        this.isNumberADecimal = false;
+        this.isNumberBDecimal = false;
     },
 
-    divide: function(numberA, numberB){
-        return numberA / numberB;
+    sum: function(numA, numB){
+        return numA + numB;
     },
 
-    getPercent: function(numberA, numberB){
-        return Math.floor(numberA / numberB * 1);
+    subtract: function(numA, numB){
+        return numA - numB;
+    },
+
+    multiply: function(numA, numB){
+        return numA * numB;
+    },
+
+    divide: function(numA, numB){
+        return numA / numB;
+    },
+
+    getPercent: function(numA, numB){
+        return Math.floor(numA / numB * 1);
     }
 }
 
@@ -131,21 +193,39 @@ document.addEventListener('click', function (event) {
             calculator.cleanAll();
         }
     }
+    else if(event.target.classList.contains('punctuation')){
+        calculator.addPoint();
+    }
 
     console.log("numberA : " + calculator.numberA);
     console.log("operator : " + calculator.operator);
     console.log("numberB : " + calculator.numberB + "\n\n");
-    
 
     if((calculator.numberA != "" && 
         calculator.operator != "" && 
         calculator.numberB != "") && 
         (event.target.classList.contains('operator') || (event.target.value === 'equals'))){
-            
-        //finally convert numbers to integer and finalize calculation;
-        let tempA = parseInt(calculator.numberA);
-        let tempB = parseInt(calculator.numberB);
-        let result = "";
+    
+        calculator.numberA += "";            
+        calculator.numberB += "";            
+
+        if(!calculator.numberA.includes('.') || !calculator.numberB.includes('.')){
+            calculator.thereIsNoDecimal();
+        }
+
+        if(calculator.isNumberADecimal || calculator.isNumberBDecimal){
+            if(calculator.isNumberADecimal){
+                var tempA = calculator.convertToDecimal(calculator.numberA);
+            }    
+            if(calculator.isNumberBDecimal){
+                var tempB = calculator.convertToDecimal(calculator.numberB);
+            }
+        }
+        else {
+            var tempA = parseFloat(calculator.numberA);
+            var tempB = parseFloat(calculator.numberB);
+            var result = "";  
+        }
 
         switch(calculator.operator.trim()){
             case "+": result = calculator.sum(tempA, tempB); break;
@@ -153,7 +233,7 @@ document.addEventListener('click', function (event) {
             case "x": result = calculator.multiply(tempA, tempB); break;
             case "/": result = calculator.divide(tempA, tempB); break;
             case "%": result = calculator.getPercent(tempA, tempB); break;
-            default: result = "que porra tu tentou calcular bro";
+            default: result = "wtf did you try to calculate bro";
         }
 
         if(event.target.value === 'equals'){
@@ -173,3 +253,39 @@ document.addEventListener('click', function (event) {
 }, false);
 
 
+/*
+var hamburger = {
+    menu: document.querySelector(".hamburger-menu"),
+    links: document.querySelector(".aside-menu"),
+
+    toggle: function(){ //decide if it toggle in or toggle out
+        if(this.menu.classList.contains("toggle")){
+            this.menu.classList.toggle("toggle");
+            this.toggleOut();
+        } 
+        else{
+            this.menu.classList.toggle("toggle");
+            this.toggleIn();
+        }
+    },
+    toggleIn: function(){
+        //this.menu.src = "assets/icon/x-icon.svg";
+        //this.menu.style.color = "#a6f";
+        this.links.style.display = "block";
+        this.links.style.animation = "toggleIn 0.3s";
+        this.links.style.right = "0vw";  
+    },
+    toggleOut: function(){
+        //this.menu.src = "assets/icon/hamburger-icon.svg";
+        //this.menu.style.color = "#ffd506";
+        this.links.style.animation = "toggleOut 0.3s";
+        this.links.style.right = "-101vw";  
+    },
+    toggleClick: function(){
+        //this.menu.src = "assets/icon/hamburger-icon.svg";
+        //this.menu.style.color = "#ffd506";
+        this.links.style.animation = "toggleOut 0.3s";
+        this.links.style.right = "-101vw";
+    }
+}
+*/
