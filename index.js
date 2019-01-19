@@ -14,7 +14,7 @@ var calculator = {
     addToCalculation : function(value) {
         //positive numberA        
         if(!isNaN(value) && this.operator == ""){
-            this.numberA += value;
+            this.numberA += value;  
         }
 
         //negative numberA
@@ -78,7 +78,6 @@ var calculator = {
     },
 
     getNumber: function(){
-        let number = "";
         if(this.input.value == 0){
             this.input.value = event.target.value; 
         }
@@ -92,13 +91,12 @@ var calculator = {
     },
 
     getOperator: function(event){
-
         switch(event.target.value){
-            case "add": this.operator = " + "; break;
-            case "sub": this.operator = " - "; break;
-            case "mul": this.operator = " x "; break;
-            case "div": this.operator = " / "; break;
-            case "per": this.operator = " % "; break;
+            case "+": this.operator = " + "; break;
+            case "-": this.operator = " - "; break;
+            case "x": this.operator = " x "; break;
+            case "/": this.operator = " / "; break;
+            case "%": this.operator = " % "; break;
         }
         
         if(this.numberA == "")
@@ -107,11 +105,13 @@ var calculator = {
                 return this.operator = "";
             }
             else{
-                console.log("tacertokrl");
+
             }
         }
 
-        this.input.value = this.numberA + this.operator;
+        if(this.operator != " √ "){
+            this.input.value = this.numberA + this.operator;
+        }
 
         return this.operator;
     },
@@ -154,6 +154,17 @@ var calculator = {
         this.isNumberBDecimal = false;
     },
 
+    squareRoot : function(numA){
+        if(this.numberA != "" && this.numberB == ""){
+            let result = Math.sqrt(numA);
+
+            this.numberA = result;
+            this.operator = "";
+            this.numberB = "";
+            return this.input.value = result;
+        }
+    },
+
     sum: function(numA, numB){
         return numA + numB;
     },
@@ -171,7 +182,7 @@ var calculator = {
     },
 
     getPercent: function(numA, numB){
-        return Math.floor(numA / numB * 1);
+        return (numA / 100) * numB;
     }
 }
 
@@ -183,6 +194,10 @@ document.addEventListener('click', function (event) {
     else if(event.target.classList.contains('operator')){
         let operator = calculator.getOperator(event);
         calculator.addToCalculation(operator);
+
+        if(event.target.value == "√"){
+            calculator.squareRoot(calculator.numberA);
+        }
     }
     else if(event.target.classList.contains('command')){
         if(event.target.value == 'del'){
@@ -196,10 +211,6 @@ document.addEventListener('click', function (event) {
     else if(event.target.classList.contains('punctuation')){
         calculator.addPoint();
     }
-
-    console.log("numberA : " + calculator.numberA);
-    console.log("operator : " + calculator.operator);
-    console.log("numberB : " + calculator.numberB + "\n\n");
 
     if((calculator.numberA != "" && 
         calculator.operator != "" && 
@@ -243,6 +254,13 @@ document.addEventListener('click', function (event) {
             calculator.input.value = result;
         }
         else if(event.target.classList.contains('operator')){
+            if(event.target.value == "√"){
+                calculator.numberA = result;
+                calculator.numberB = "";
+                calculator.squareRoot(calculator.numberA);
+                return;
+            }
+            
             calculator.numberA = result;
             calculator.operator = calculator.getOperator(event);
             calculator.numberB = "";
@@ -251,41 +269,3 @@ document.addEventListener('click', function (event) {
     }
 
 }, false);
-
-
-/*
-var hamburger = {
-    menu: document.querySelector(".hamburger-menu"),
-    links: document.querySelector(".aside-menu"),
-
-    toggle: function(){ //decide if it toggle in or toggle out
-        if(this.menu.classList.contains("toggle")){
-            this.menu.classList.toggle("toggle");
-            this.toggleOut();
-        } 
-        else{
-            this.menu.classList.toggle("toggle");
-            this.toggleIn();
-        }
-    },
-    toggleIn: function(){
-        //this.menu.src = "assets/icon/x-icon.svg";
-        //this.menu.style.color = "#a6f";
-        this.links.style.display = "block";
-        this.links.style.animation = "toggleIn 0.3s";
-        this.links.style.right = "0vw";  
-    },
-    toggleOut: function(){
-        //this.menu.src = "assets/icon/hamburger-icon.svg";
-        //this.menu.style.color = "#ffd506";
-        this.links.style.animation = "toggleOut 0.3s";
-        this.links.style.right = "-101vw";  
-    },
-    toggleClick: function(){
-        //this.menu.src = "assets/icon/hamburger-icon.svg";
-        //this.menu.style.color = "#ffd506";
-        this.links.style.animation = "toggleOut 0.3s";
-        this.links.style.right = "-101vw";
-    }
-}
-*/

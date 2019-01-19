@@ -77,16 +77,13 @@ body {
     font-weight: 400;
 }
 
-.parenthesis {
+.leftParenthesis,
+.rightParenthesis {
     width: 12.5% !important;
 }
 
 .panel-container .row button:last-child {
     color: #0c6;
-}
-
-.panel-container .row button:hover {
-    background-color: #333;
 }
 
 .panel-container .fifth-row button:last-child {
